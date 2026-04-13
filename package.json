@@ -1,0 +1,16 @@
+{
+  "name": "hoodly-search",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "crawl": "node crawler.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.8.4",
+    "cheerio": "^1.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}

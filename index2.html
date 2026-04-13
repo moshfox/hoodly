@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hoodly Search</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#ffffff;
+      --fg:#0a0a0a;
+      --muted:rgba(10,10,10,.58);
+      --muted-2:rgba(10,10,10,.42);
+      --line:rgba(10,10,10,.10);
+      --line-strong:rgba(10,10,10,.18);
+      --card:rgba(255,255,255,.60);
+      --card-strong:rgba(255,255,255,.78);
+      --soft:rgba(10,10,10,.035);
+      --shadow:0 18px 60px rgba(10,10,10,.10);
+      --shadow-soft:0 10px 40px rgba(10,10,10,.07);
+      --shadow-hover:0 24px 80px rgba(10,10,10,.12);
+      --radius:26px;
+      --radius2:18px;
+      --accent:#0a0a0a;
+      --ok:#0f9d58;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+
+    body{
+  margin:0;
+  color:var(--fg);
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  overflow-x:hidden;
+  background-color:#f8f8f8;
+  background-image:
+    radial-gradient(circle at 18% 8%, rgba(0,0,0,.06), transparent 36%),
+    radial-gradient(circle at 82% 0%, rgba(0,0,0,.05), transparent 42%),
+    radial-gradient(circle at 60% 95%, rgba(0,0,0,.06), transparent 48%),
+    linear-gradient(180deg, rgba(255,255,255,.50), rgba(255,255,255,.15));
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-attachment: fixed;
+}
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background:rgba(255,255,255,.20);
+      backdrop-filter: blur(2px);
+      z-index:0;
+    }
+
+    .page{
+      position:relative;
+      z-index:1;
+      width:min(1180px, calc(100% - 28px));
+      margin:0 auto;
+      padding:16px 0 40px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom:18px;
+      flex-wrap:wrap;
+    }
+
+    .leftTop{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .brandLink{
+      text-decoration:none;
+      color:var(--fg);
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+
+    .brandWord{
+      font-family:"DM Serif Display", serif;
+      font-size:30px;
+      line-height:1;
+      letter-spacing:.2px;
+      user-select:none;
+    }
+
+    .crumb{
+      font-family:"JetBrains Mono", monospace;
+      font-size:12px;
+      color:var(--muted-2);
+      padding:9px 11px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.46);
+      backdrop-filter: blur(12px);
+      white-space:nowrap;
+    }
+
+    .topActions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .profilePill,
+    .iconBtn{
+      border:1px solid var(--line);
+      background:var(--card);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow-soft);
+      border-radius:999px;
+      min-height:46px;
+    }
+
+    .profilePill{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:7px 12px 7px 7px;
+      max-width:min(58vw, 260px);
+      cursor:pointer;
+      transition:transform .18s ease, background .2s ease, box-shadow .2s ease;
+    }
+
+    .profilePill:hover,
+    .iconBtn:hover{
+      transform:translateY(-1px);
+      background:var(--card-strong);
+      box-shadow:var(--shadow);
+    }
+
+    .avatar{
+      width:32px;
+      height:32px;
+      border-radius:50%;
+      object-fit:cover;
+      background:#ddd;
+      flex:0 0 auto;
+      border:1px solid rgba(0,0,0,.08);
+    }
+
+    .profileName{
+      font-size:14px;
+      font-weight:700;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .iconBtn{
+      border:none;
+      padding:0 14px;
+      cursor:pointer;
+      font-weight:700;
+      color:var(--fg);
+      transition:transform .18s ease, background .2s ease, box-shadow .2s ease;
+    }
+
+    .heroPanel{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.45);
+      backdrop-filter: blur(18px);
+      border-radius:34px;
+      box-shadow:var(--shadow);
+      padding:22px;
+      margin-bottom:16px;
+      overflow:hidden;
+      position:relative;
+      animation:rise .7s cubic-bezier(.2,.9,.1,1) both;
+    }
+
+    .heroPanel::after{
+      content:"";
+      position:absolute;
+      inset:auto -60px -100px auto;
+      width:240px;
+      height:240px;
+      background:radial-gradient(circle, rgba(0,0,0,.06), transparent 62%);
+      pointer-events:none;
+      filter:blur(6px);
+    }
+
+    .heroInner{
+      display:grid;
+      gap:18px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      width:max-content;
+      max-width:100%;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.55);
+      border-radius:999px;
+      padding:9px 12px;
+      font-size:12px;
+      color:var(--muted);
+      font-family:"JetBrains Mono", monospace;
+    }
+
+    .heroTitle{
+      margin:0;
+      font-family:"DM Serif Display", serif;
+      font-size:clamp(34px, 5vw, 58px);
+      line-height:.98;
+      letter-spacing:.2px;
+    }
+
+    .heroSub{
+      margin:0;
+      max-width:760px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.7;
+    }
+
+    .searchShell{
+      width:100%;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:10px;
+      border:1px solid var(--line);
+      border-radius:999px;
+      background:var(--card);
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow-soft);
+      transition:transform .18s ease, border-color .2s ease, box-shadow .25s ease, background .2s ease;
+    }
+
+    .searchShell:focus-within{
+      transform:translateY(-1px);
+      border-color:var(--line-strong);
+      background:var(--card-strong);
+      box-shadow:var(--shadow-hover);
+    }
+
+    .pill{
+      font-family:"JetBrains Mono", monospace;
+      font-size:12px;
+      color:rgba(10,10,10,.72);
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:rgba(10,10,10,.03);
+      white-space:nowrap;
+      user-select:none;
+      flex:0 0 auto;
+    }
+
+    .input{
+      flex:1;
+      border:none;
+      outline:none;
+      background:transparent;
+      font-size:16px;
+      padding:12px 8px;
+      color:var(--fg);
+      min-width:0;
+    }
+
+    .input::placeholder{
+      color:rgba(10,10,10,.35);
+    }
+
+    .go{
+      border:none;
+      border-radius:999px;
+      background:#0a0a0a;
+      color:#fff;
+      font-weight:800;
+      padding:13px 18px;
+      cursor:pointer;
+      transition:transform .14s ease, opacity .18s ease, box-shadow .18s ease;
+      flex:0 0 auto;
+      box-shadow:0 10px 24px rgba(10,10,10,.18);
+    }
+
+    .go:hover{transform:translateY(-1px)}
+    .go:active{transform:translateY(0);opacity:.88}
+
+    .toolbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:2px;
+    }
+
+    .summary{
+      color:var(--muted);
+      font-size:14px;
+      min-height:20px;
+    }
+
+    .summary strong{
+      color:var(--fg);
+    }
+
+    .quick{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    .chip{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.55);
+      backdrop-filter: blur(12px);
+      color:var(--muted);
+      padding:10px 13px;
+      border-radius:999px;
+      cursor:pointer;
+      font-size:13px;
+      transition:transform .18s ease, background .18s ease, color .18s ease;
+    }
+
+    .chip:hover{
+      transform:translateY(-1px);
+      background:rgba(255,255,255,.82);
+      color:var(--fg);
+    }
+
+    .resultsWrap{
+      display:grid;
+      grid-template-columns:minmax(0, 1fr);
+      gap:14px;
+    }
+
+    .result{
+      position:relative;
+      border:1px solid var(--line);
+      background:var(--card);
+      border-radius:24px;
+      padding:18px 18px 17px;
+      box-shadow:var(--shadow-soft);
+      transition:transform .16s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+      overflow:hidden;
+      animation:fadeUp .35s ease both;
+    }
+
+    .result:hover{
+      transform:translateY(-2px);
+      background:var(--card-strong);
+      border-color:rgba(10,10,10,.14);
+      box-shadow:var(--shadow);
+    }
+
+    .resultTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:10px;
+    }
+
+    .resultMeta{
+      min-width:0;
+      flex:1;
+    }
+
+    .domainRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+      margin-bottom:8px;
+    }
+
+    .favicon{
+      width:18px;
+      height:18px;
+      border-radius:50%;
+      flex:0 0 auto;
+      object-fit:cover;
+      background:rgba(0,0,0,.06);
+      border:1px solid rgba(0,0,0,.06);
+    }
+
+    .url{
+      font-size:12px;
+      color:rgba(10,10,10,.55);
+      font-family:"JetBrains Mono", monospace;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .openTag{
+      flex:0 0 auto;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.55);
+      border-radius:999px;
+      padding:8px 11px;
+      font-size:12px;
+      color:var(--muted);
+      text-decoration:none;
+      transition:background .18s ease, transform .18s ease;
+    }
+
+    .openTag:hover{
+      background:rgba(255,255,255,.84);
+      transform:translateY(-1px);
+    }
+
+    .title{
+      display:inline-block;
+      text-decoration:none;
+      color:#0a0a0a;
+      font-size:22px;
+      font-weight:800;
+      line-height:1.2;
+      margin-bottom:8px;
+      letter-spacing:-.02em;
+    }
+
+    .title:hover{
+      text-decoration:underline;
+      text-decoration-thickness:1.5px;
+      text-underline-offset:3px;
+    }
+
+    .desc{
+      margin:0;
+      color:rgba(10,10,10,.72);
+      line-height:1.68;
+      font-size:14px;
+      max-width:90ch;
+    }
+
+    .resultBottom{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    .resultHint{
+      font-size:12px;
+      color:var(--muted-2);
+      font-family:"JetBrains Mono", monospace;
+    }
+
+    .miniAction{
+      border:none;
+      background:rgba(10,10,10,.05);
+      color:var(--fg);
+      border-radius:999px;
+      padding:10px 12px;
+      font-weight:700;
+      cursor:pointer;
+      transition:transform .14s ease, background .18s ease;
+    }
+
+    .miniAction:hover{
+      transform:translateY(-1px);
+      background:rgba(10,10,10,.08);
+    }
+
+    .empty{
+      border:1px solid var(--line);
+      background:var(--card);
+      border-radius:24px;
+      padding:26px;
+      box-shadow:var(--shadow-soft);
+      color:var(--muted);
+      text-align:center;
+      animation:fade .35s ease both;
+    }
+
+    .empty strong{
+      display:block;
+      color:var(--fg);
+      margin-bottom:8px;
+      font-size:18px;
+    }
+
+    .empty p{
+      margin:0 auto;
+      max-width:560px;
+      line-height:1.7;
+    }
+
+    .skeletonList{
+      display:grid;
+      gap:14px;
+    }
+
+    .skeleton{
+      border:1px solid var(--line);
+      background:var(--card);
+      border-radius:24px;
+      padding:18px;
+      box-shadow:var(--shadow-soft);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .skeleton::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      transform:translateX(-100%);
+      background:linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,.65),
+        transparent
+      );
+      animation:shimmer 1.2s infinite;
+    }
+
+    .sk-line{
+      height:12px;
+      border-radius:999px;
+      background:rgba(10,10,10,.08);
+      margin-bottom:12px;
+    }
+
+    .sk-line.sm{width:24%}
+    .sk-line.md{width:46%}
+    .sk-line.lg{width:72%}
+    .sk-line.full{width:100%}
+    .sk-line:last-child{margin-bottom:0}
+
+    .footerHint{
+      margin-top:22px;
+      color:rgba(10,10,10,.48);
+      font-size:12px;
+      font-family:"JetBrains Mono", monospace;
+      text-align:center;
+    }
+
+    .modalWrap{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background:rgba(8,8,8,.26);
+      backdrop-filter: blur(10px);
+      opacity:0;
+      visibility:hidden;
+      transition:opacity .25s ease, visibility .25s ease;
+      z-index:50;
+    }
+
+    .modalWrap.show{
+      opacity:1;
+      visibility:visible;
+    }
+
+    .modal{
+      width:min(560px, 100%);
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:28px;
+      background:rgba(255,255,255,.74);
+      backdrop-filter: blur(22px);
+      box-shadow:0 28px 100px rgba(0,0,0,.18);
+      overflow:hidden;
+      transform:translateY(10px) scale(.98);
+      transition:transform .28s cubic-bezier(.2,.9,.1,1);
+    }
+
+    .modalWrap.show .modal{
+      transform:translateY(0) scale(1);
+    }
+
+    .modalHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:18px 18px 14px;
+      border-bottom:1px solid rgba(0,0,0,.08);
+      background:rgba(255,255,255,.55);
+    }
+
+    .modalTitle{
+      font-size:18px;
+      font-weight:800;
+      letter-spacing:-.2px;
+    }
+
+    .closeBtn{
+      border:none;
+      background:rgba(10,10,10,.06);
+      border-radius:999px;
+      padding:10px 12px;
+      cursor:pointer;
+      font-weight:800;
+      transition:transform .18s ease, background .18s ease;
+    }
+
+    .closeBtn:hover{
+      transform:translateY(-1px);
+      background:rgba(10,10,10,.09);
+    }
+
+    .modalBody{
+      padding:18px;
+      display:grid;
+      gap:14px;
+    }
+
+    .field{
+      display:grid;
+      gap:8px;
+    }
+
+    .field label{
+      font-size:13px;
+      font-weight:700;
+      color:rgba(10,10,10,.74);
+    }
+
+    .field input[type="text"],
+    .field input[type="url"]{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:rgba(255,255,255,.74);
+      padding:14px 14px;
+      font-size:14px;
+      outline:none;
+      transition:border-color .2s ease, transform .18s ease;
+    }
+
+    .field input:focus{
+      border-color:rgba(10,10,10,.22);
+      transform:translateY(-1px);
+    }
+
+    .field small{
+      color:rgba(10,10,10,.52);
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .preview{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      padding:14px;
+      border:1px solid var(--line);
+      border-radius:20px;
+      background:rgba(255,255,255,.54);
+    }
+
+    .preview .avatar{
+      width:54px;
+      height:54px;
+    }
+
+    .previewMeta{
+      min-width:0;
+    }
+
+    .previewMeta strong{
+      display:block;
+      font-size:15px;
+      margin-bottom:4px;
+    }
+
+    .previewMeta span{
+      display:block;
+      font-size:12px;
+      color:rgba(10,10,10,.58);
+      font-family:"JetBrains Mono", monospace;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:100%;
+    }
+
+    .modalActions{
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
+      padding-top:4px;
+    }
+
+    .btn{
+      border:none;
+      border-radius:999px;
+      padding:12px 16px;
+      cursor:pointer;
+      font-weight:800;
+      transition:transform .14s ease, opacity .18s ease, background .18s ease;
+    }
+
+    .btn:hover{transform:translateY(-1px)}
+    .btn:active{transform:translateY(0);opacity:.88}
+
+    .btnGhost{
+      background:rgba(10,10,10,.07);
+      color:#0a0a0a;
+    }
+
+    .btnPrimary{
+      background:#0a0a0a;
+      color:#fff;
+    }
+
+    .hiddenFile{
+      display:none;
+    }
+
+    @media (max-width: 860px){
+      .toolbar{
+        align-items:flex-start;
+        flex-direction:column;
+      }
+
+      .heroPanel{
+        padding:18px;
+      }
+    }
+
+    @media (max-width: 720px){
+      .page{
+        width:min(100%, calc(100% - 18px));
+        padding-top:12px;
+      }
+
+      .topbar{
+        margin-bottom:14px;
+      }
+
+      .brandWord{
+        font-size:28px;
+      }
+
+      .crumb{
+        display:none;
+      }
+
+      .heroTitle{
+        font-size:clamp(30px, 9vw, 42px);
+      }
+
+      .searchShell{
+        gap:8px;
+        padding:8px;
+      }
+
+      .pill{
+        display:none;
+      }
+
+      .go{
+        padding:13px 15px;
+      }
+
+      .title{
+        font-size:18px;
+      }
+
+      .profileName{
+        max-width:110px;
+      }
+
+      .resultTop{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+    }
+
+    @keyframes rise{
+      from{opacity:0;transform:translateY(12px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    @keyframes fade{
+      from{opacity:0}
+      to{opacity:1}
+    }
+
+    @keyframes fadeUp{
+      from{opacity:0;transform:translateY(10px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    @keyframes shimmer{
+      100%{transform:translateX(100%)}
+    }
+    .bgFixed{
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  background-image:
+    radial-gradient(circle at 18% 8%, rgba(0,0,0,.06), transparent 36%),
+    radial-gradient(circle at 82% 0%, rgba(0,0,0,.05), transparent 42%),
+    radial-gradient(circle at 60% 95%, rgba(0,0,0,.06), transparent 48%),
+    linear-gradient(180deg, rgba(255,255,255,.50), rgba(255,255,255,.15));
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+}
+  </style>
+</head>
+<body>
+    <div class="bgFixed"></div>
+  <div class="page">
+    <header class="topbar">
+      <div class="leftTop">
+        <a href="index.html" class="brandLink" aria-label="Go to Hoodly home">
+          <div class="brandWord">Hoodly</div>
+        </a>
+        <div class="crumb">/ search</div>
+      </div>
+
+      <div class="topActions">
+        <button class="profilePill" id="profileBtn" type="button" title="Profile settings">
+          <img id="topAvatar" class="avatar" alt="Profile photo">
+          <div class="profileName" id="topName">User</div>
+        </button>
+
+        <button class="iconBtn" id="settingsBtn" type="button">Customize</button>
+      </div>
+    </header>
+
+    <section class="heroPanel">
+      <div class="heroInner">
+        <div class="eyebrow" id="welcomeLine">Search mode active.</div>
+
+        <div>
+          <h1 class="heroTitle">Hoodly results.</h1>
+          <p class="heroSub">
+            This is a demo version; if the URL is not found in your search, that's normal.
+          </p>
+        </div>
+
+        <form class="searchShell" id="searchForm">
+          <div class="pill">CTRL / ⌘ + K</div>
+          <input class="input" id="searchInput" type="text" placeholder="Search something…" autocomplete="off">
+          <button class="go" type="submit">Search</button>
+        </form>
+
+        <div class="toolbar">
+          <div class="summary" id="summary">Ready. Type a query to begin.</div>
+
+          <div class="quick">
+            <button class="chip" type="button" data-q="Minimal web app ideas">Minimal app ideas</button>
+            <button class="chip" type="button" data-q="Modern white UI design principles">White UI</button>
+            <button class="chip" type="button" data-q="Best study methods for exams">Study better</button>
+            <button class="chip" type="button" data-q="How to make a browser homepage in HTML CSS JS">Build homepage</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <main class="resultsWrap" id="results"></main>
+
+    <div class="footerHint">Hoodly Search · local profile · live query · aesthetically unemployed but productive</div>
+  </div>
+
+  <div class="modalWrap" id="profileModalWrap" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+      <div class="modalHead">
+        <div class="modalTitle" id="profileModalTitle">Customize your Hoodly</div>
+        <button class="closeBtn" id="closeModalBtn" type="button">Close</button>
+      </div>
+
+      <div class="modalBody">
+        <div class="preview">
+          <img id="previewAvatar" class="avatar" alt="Preview avatar">
+          <div class="previewMeta">
+            <strong id="previewName">User</strong>
+            <span id="previewWallpaper">Default background</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="nameInput">Name</label>
+          <input id="nameInput" type="text" maxlength="24" placeholder="User">
+          <small>Saved only in your browser. No login, no backend crisis, no tiny goblin managing your preferences.</small>
+        </div>
+
+        <div class="field">
+          <label for="avatarUrlInput">Profile photo URL</label>
+          <input id="avatarUrlInput" type="url" placeholder="https://example.com/photo.jpg">
+          <small>Paste an image URL or upload a file below.</small>
+        </div>
+
+        <div class="field">
+          <label>Upload profile photo</label>
+          <div class="modalActions" style="justify-content:flex-start;">
+            <button class="btn btnGhost" id="uploadAvatarBtn" type="button">Upload image</button>
+            <button class="btn btnGhost" id="randomAvatarBtn" type="button">Random avatar</button>
+          </div>
+          <input class="hiddenFile" id="avatarFileInput" type="file" accept="image/*">
+        </div>
+
+        <div class="field">
+          <label for="wallpaperUrlInput">Background URL</label>
+          <input id="wallpaperUrlInput" type="url" placeholder="https://example.com/wallpaper.jpg">
+          <small>Paste an image URL or upload a background image below.</small>
+        </div>
+
+        <div class="field">
+          <label>Upload background</label>
+          <div class="modalActions" style="justify-content:flex-start;">
+            <button class="btn btnGhost" id="uploadWallpaperBtn" type="button">Upload background</button>
+            <button class="btn btnGhost" id="defaultWallpaperBtn" type="button">Default background</button>
+          </div>
+          <input class="hiddenFile" id="wallpaperFileInput" type="file" accept="image/*">
+        </div>
+
+        <div class="modalActions">
+          <button class="btn btnGhost" id="skipBtn" type="button">Skip</button>
+          <button class="btn btnPrimary" id="saveBtn" type="button">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEYS = {
+      profile: "hoodly_profile_v1",
+      firstVisitDone: "hoodly_first_visit_done_v1"
+    };
+
+    const DEFAULT_AVATARS = [
+      "https://api.dicebear.com/7.x/thumbs/svg?seed=Nova",
+      "https://api.dicebear.com/7.x/thumbs/svg?seed=Pixel",
+      "https://api.dicebear.com/7.x/thumbs/svg?seed=Orbit",
+      "https://api.dicebear.com/7.x/thumbs/svg?seed=Shadow",
+      "https://api.dicebear.com/7.x/thumbs/svg?seed=Cloud",
+      "https://api.dicebear.com/7.x/thumbs/svg?seed=Hoodly"
+    ];
+
+    const DEFAULT_PROFILE = {
+      name: "User",
+      avatar: DEFAULT_AVATARS[Math.floor(Math.random() * DEFAULT_AVATARS.length)],
+      wallpaper: ""
+    };
+
+    const body = document.body;
+
+    const profileBtn = document.getElementById("profileBtn");
+    const settingsBtn = document.getElementById("settingsBtn");
+    const topAvatar = document.getElementById("topAvatar");
+    const topName = document.getElementById("topName");
+    const welcomeLine = document.getElementById("welcomeLine");
+
+    const searchForm = document.getElementById("searchForm");
+    const searchInput = document.getElementById("searchInput");
+    const resultsEl = document.getElementById("results");
+    const summaryEl = document.getElementById("summary");
+
+    const profileModalWrap = document.getElementById("profileModalWrap");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const skipBtn = document.getElementById("skipBtn");
+
+    const nameInput = document.getElementById("nameInput");
+    const avatarUrlInput = document.getElementById("avatarUrlInput");
+    const wallpaperUrlInput = document.getElementById("wallpaperUrlInput");
+
+    const previewAvatar = document.getElementById("previewAvatar");
+    const previewName = document.getElementById("previewName");
+    const previewWallpaper = document.getElementById("previewWallpaper");
+
+    const uploadAvatarBtn = document.getElementById("uploadAvatarBtn");
+    const randomAvatarBtn = document.getElementById("randomAvatarBtn");
+    const avatarFileInput = document.getElementById("avatarFileInput");
+
+    const uploadWallpaperBtn = document.getElementById("uploadWallpaperBtn");
+    const defaultWallpaperBtn = document.getElementById("defaultWallpaperBtn");
+    const wallpaperFileInput = document.getElementById("wallpaperFileInput");
+
+    function safeParse(json, fallback){
+      try{
+        return JSON.parse(json);
+      }catch{
+        return fallback;
+      }
+    }
+
+    function normalizeProfile(profile){
+      const p = profile && typeof profile === "object" ? profile : {};
+      return {
+        name: (typeof p.name === "string" && p.name.trim()) ? p.name.trim().slice(0, 24) : "User",
+        avatar: (typeof p.avatar === "string" && p.avatar.trim()) ? p.avatar.trim() : DEFAULT_AVATARS[Math.floor(Math.random() * DEFAULT_AVATARS.length)],
+        wallpaper: (typeof p.wallpaper === "string") ? p.wallpaper.trim() : ""
+      };
+    }
+
+    function loadProfile(){
+      const raw = localStorage.getItem(STORAGE_KEYS.profile);
+      if(!raw){
+        const first = { ...DEFAULT_PROFILE };
+        saveProfile(first);
+        return first;
+      }
+      return normalizeProfile(safeParse(raw, DEFAULT_PROFILE));
+    }
+
+    function saveProfile(profile){
+      const normalized = normalizeProfile(profile);
+      localStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(normalized));
+      return normalized;
+    }
+
+   function applyWallpaper(url){
+  if(url){
+    body.style.backgroundImage = `
+      linear-gradient(180deg, rgba(255,255,255,.34), rgba(255,255,255,.18)),
+      url("${url.replace(/"/g, '\\"')}")
+    `;
+    body.style.backgroundSize = "cover";
+    body.style.backgroundPosition = "center";
+    body.style.backgroundRepeat = "no-repeat";
+    body.style.backgroundAttachment = "fixed";
+  }else{
+    body.style.backgroundImage = `
+      radial-gradient(circle at 18% 8%, rgba(0,0,0,.06), transparent 36%),
+      radial-gradient(circle at 82% 0%, rgba(0,0,0,.05), transparent 42%),
+      radial-gradient(circle at 60% 95%, rgba(0,0,0,.06), transparent 48%),
+      linear-gradient(180deg, rgba(255,255,255,.50), rgba(255,255,255,.15))
+    `;
+    body.style.backgroundSize = "cover";
+    body.style.backgroundPosition = "center";
+    body.style.backgroundRepeat = "no-repeat";
+    body.style.backgroundAttachment = "fixed";
+  }
+}
+
+    function applyProfile(profile){
+      const current = normalizeProfile(profile);
+      topName.textContent = current.name;
+      topAvatar.src = current.avatar;
+      previewName.textContent = current.name;
+      previewAvatar.src = current.avatar;
+      previewWallpaper.textContent = current.wallpaper ? "Custom background" : "Default background";
+      welcomeLine.textContent = `Search mode · Welcome, ${current.name}.`;
+      applyWallpaper(current.wallpaper);
+    }
+
+    function openModal(){
+      profileModalWrap.classList.add("show");
+      profileModalWrap.setAttribute("aria-hidden", "false");
+      nameInput.focus();
+    }
+
+    function closeModal(){
+      profileModalWrap.classList.remove("show");
+      profileModalWrap.setAttribute("aria-hidden", "true");
+    }
+
+    function fillModal(profile){
+      const current = normalizeProfile(profile);
+      nameInput.value = current.name || "";
+      avatarUrlInput.value = current.avatar || "";
+      wallpaperUrlInput.value = current.wallpaper || "";
+      previewName.textContent = current.name || "User";
+      previewAvatar.src = current.avatar || DEFAULT_AVATARS[0];
+      previewWallpaper.textContent = current.wallpaper ? "Custom background" : "Default background";
+    }
+
+    function getModalProfile(){
+      return normalizeProfile({
+        name: nameInput.value,
+        avatar: avatarUrlInput.value,
+        wallpaper: wallpaperUrlInput.value
+      });
+    }
+
+    function syncPreview(){
+      const current = getModalProfile();
+      previewName.textContent = current.name || "User";
+      previewAvatar.src = current.avatar || DEFAULT_AVATARS[0];
+      previewWallpaper.textContent = current.wallpaper ? "Custom background" : "Default background";
+    }
+
+    function fileToDataURL(file){
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Could not read file."));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handleFileInput(fileInput, targetInput){
+      const file = fileInput.files && fileInput.files[0];
+      if(!file) return;
+      try{
+        const dataUrl = await fileToDataURL(file);
+        targetInput.value = dataUrl;
+        syncPreview();
+      }catch(err){
+        console.error(err);
+        alert("Could not load that image.");
+      }finally{
+        fileInput.value = "";
+      }
+    }
+
+    function escapeHtml(str = "") {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function getQueryParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name) || "";
+    }
+
+    function setQueryParam(name, value) {
+      const url = new URL(window.location.href);
+      if(value && value.trim()){
+        url.searchParams.set(name, value.trim());
+      }else{
+        url.searchParams.delete(name);
+      }
+      window.history.replaceState({}, "", url.toString());
+    }
+
+    function getHostname(url){
+      try{
+        return new URL(url).hostname.replace(/^www\./, "");
+      }catch{
+        return "";
+      }
+    }
+
+    function getFavicon(url){
+      const host = getHostname(url);
+      return host ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=64` : "";
+    }
+
+    function showSkeletons(count = 5){
+      resultsEl.innerHTML = `
+        <div class="skeletonList">
+          ${Array.from({ length: count }).map(() => `
+            <article class="skeleton">
+              <div class="sk-line sm"></div>
+              <div class="sk-line lg"></div>
+              <div class="sk-line full"></div>
+              <div class="sk-line full"></div>
+              <div class="sk-line md"></div>
+            </article>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderEmpty(query){
+      resultsEl.innerHTML = `
+        <div class="empty">
+          <strong>No results for "${escapeHtml(query)}"</strong>
+          <p>
+            Nothing matched that search yet. Try a broader query, fewer words, or something less aggressively specific.
+          </p>
+        </div>
+      `;
+    }
+
+    function renderError(){
+      resultsEl.innerHTML = `
+        <div class="empty">
+          <strong>Could not connect to the search server</strong>
+          <p>
+            Make sure your backend is running on <strong>http://localhost:3000</strong>.  
+            Hoodly is gorgeous, but sadly still needs its backend coffee.
+          </p>
+        </div>
+      `;
+    }
+
+    function renderResults(items, query, tookMs) {
+      resultsEl.innerHTML = "";
+
+      if (!items.length) {
+        summaryEl.innerHTML = `No results for <strong>"${escapeHtml(query)}"</strong>`;
+        renderEmpty(query);
+        return;
+      }
+
+      summaryEl.innerHTML = `<strong>${items.length}</strong> result${items.length === 1 ? "" : "s"} for <strong>"${escapeHtml(query)}"</strong> in ${tookMs} ms`;
+
+      const fragment = document.createDocumentFragment();
+
+      items.forEach((item, index) => {
+        const url = item.url || "#";
+        const safeUrl = escapeHtml(url);
+        const title = escapeHtml(item.title || "Untitled");
+        const desc = escapeHtml(item.description || item.text || "No description available.");
+        const host = getHostname(url);
+        const favicon = getFavicon(url);
+
+        const card = document.createElement("article");
+        card.className = "result";
+        card.style.animationDelay = `${Math.min(index * 35, 220)}ms`;
+
+        card.innerHTML = `
+          <div class="resultTop">
+            <div class="resultMeta">
+              <div class="domainRow">
+                <img class="favicon" src="${escapeHtml(favicon)}" alt="" loading="lazy" onerror="this.style.display='none'">
+                <div class="url">${escapeHtml(host || url)}</div>
+              </div>
+
+              <a class="title" href="${safeUrl}" target="_blank" rel="noopener noreferrer">
+                ${title}
+              </a>
+
+              <p class="desc">${desc}</p>
+            </div>
+
+            <a class="openTag" href="${safeUrl}" target="_blank" rel="noopener noreferrer">Open ↗</a>
+          </div>
+
+          <div class="resultBottom">
+            <div class="resultHint">${escapeHtml(url)}</div>
+            <button class="miniAction" type="button" data-url="${safeUrl}">Copy link</button>
+          </div>
+        `;
+
+        fragment.appendChild(card);
+      });
+
+      resultsEl.appendChild(fragment);
+
+      resultsEl.querySelectorAll(".miniAction").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const raw = btn.getAttribute("data-url") || "";
+          const decoded = raw
+            .replaceAll("&amp;", "&")
+            .replaceAll("&lt;", "<")
+            .replaceAll("&gt;", ">")
+            .replaceAll("&quot;", '"')
+            .replaceAll("&#039;", "'");
+          try{
+            await navigator.clipboard.writeText(decoded);
+            const old = btn.textContent;
+            btn.textContent = "Copied";
+            setTimeout(() => btn.textContent = old, 1200);
+          }catch{
+            btn.textContent = "Failed";
+            setTimeout(() => btn.textContent = "Copy link", 1200);
+          }
+        });
+      });
+    }
+
+    async function runSearch(query) {
+      const clean = query.trim();
+
+      if (!clean) {
+        summaryEl.textContent = "Write something to search.";
+        resultsEl.innerHTML = "";
+        setQueryParam("q", "");
+        return;
+      }
+
+      setQueryParam("q", clean);
+      summaryEl.textContent = "Searching…";
+      showSkeletons(5);
+
+      const start = performance.now();
+
+      try {
+        const res = await fetch(`http://localhost:3000/search?q=${encodeURIComponent(clean)}`);
+
+        if(!res.ok){
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        const tookMs = Math.round(performance.now() - start);
+
+        renderResults(Array.isArray(data.results) ? data.results : [], clean, tookMs);
+      } catch (err) {
+        console.error(err);
+        summaryEl.textContent = "Search failed.";
+        renderError();
+      }
+    }
+
+    searchForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      runSearch(searchInput.value);
+    });
+
+    document.querySelectorAll(".chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const q = chip.getAttribute("data-q") || chip.textContent.trim();
+        searchInput.value = q;
+        runSearch(q);
+      });
+    });
+
+    profileBtn.addEventListener("click", () => {
+      fillModal(loadProfile());
+      openModal();
+    });
+
+    settingsBtn.addEventListener("click", () => {
+      fillModal(loadProfile());
+      openModal();
+    });
+
+    closeModalBtn.addEventListener("click", closeModal);
+
+    profileModalWrap.addEventListener("click", (e) => {
+      if(e.target === profileModalWrap) closeModal();
+    });
+
+    saveBtn.addEventListener("click", () => {
+      const saved = saveProfile(getModalProfile());
+      applyProfile(saved);
+      localStorage.setItem(STORAGE_KEYS.firstVisitDone, "1");
+      closeModal();
+    });
+
+    skipBtn.addEventListener("click", () => {
+      const current = loadProfile();
+      const ensured = saveProfile(current);
+      applyProfile(ensured);
+      localStorage.setItem(STORAGE_KEYS.firstVisitDone, "1");
+      closeModal();
+    });
+
+    nameInput.addEventListener("input", syncPreview);
+    avatarUrlInput.addEventListener("input", syncPreview);
+    wallpaperUrlInput.addEventListener("input", syncPreview);
+
+    uploadAvatarBtn.addEventListener("click", () => avatarFileInput.click());
+    uploadWallpaperBtn.addEventListener("click", () => wallpaperFileInput.click());
+
+    avatarFileInput.addEventListener("change", () => handleFileInput(avatarFileInput, avatarUrlInput));
+    wallpaperFileInput.addEventListener("change", () => handleFileInput(wallpaperFileInput, wallpaperUrlInput));
+
+    randomAvatarBtn.addEventListener("click", () => {
+      const choice = DEFAULT_AVATARS[Math.floor(Math.random() * DEFAULT_AVATARS.length)] + "&r=" + Date.now();
+      avatarUrlInput.value = choice;
+      syncPreview();
+    });
+
+    defaultWallpaperBtn.addEventListener("click", () => {
+      wallpaperUrlInput.value = "";
+      syncPreview();
+    });
+
+    window.addEventListener("keydown", (e) => {
+      const isK = (e.key || "").toLowerCase() === "k";
+      if((e.ctrlKey || e.metaKey) && isK){
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      }
+
+      if(e.key === "Escape" && profileModalWrap.classList.contains("show")){
+        closeModal();
+      }
+    });
+
+    topAvatar.addEventListener("error", () => {
+      topAvatar.src = DEFAULT_AVATARS[0];
+    });
+
+    previewAvatar.addEventListener("error", () => {
+      previewAvatar.src = DEFAULT_AVATARS[0];
+    });
+
+    (function boot(){
+      const profile = loadProfile();
+      applyProfile(profile);
+
+      const q = getQueryParam("q");
+      searchInput.value = q;
+
+      if(q){
+        runSearch(q);
+      }else{
+        searchInput.focus();
+      }
+    })();
+  </script>
+</body>
+</html>
