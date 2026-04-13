@@ -90,5 +90,5 @@ app.get("/search", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Search server running on http://localhost:${PORT}`);
+console.log(`Search server running on port ${PORT}`);
 });
