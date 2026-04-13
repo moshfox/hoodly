@@ -1208,6 +1208,7 @@
       summaryEl.innerHTML = `<strong>${items.length}</strong> result${items.length === 1 ? "" : "s"} for <strong>"${escapeHtml(query)}"</strong> in ${tookMs} ms`;
 
       const fragment = document.createDocumentFragment();
+      const API_BASE = "https://hoodly-x1vf.onrender.com";
 
       items.forEach((item, index) => {
         const url = item.url || "#";
