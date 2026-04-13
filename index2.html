@@ -1289,7 +1289,9 @@
       const start = performance.now();
 
       try {
-        const res = await fetch(`http://localhost:3000/search?q=${encodeURIComponent(clean)}`);
+        const API_BASE = "https://hoodly-x1vf.onrender.com/";
+
+const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(clean)}`);
 
         if(!res.ok){
           throw new Error(`HTTP ${res.status}`);
